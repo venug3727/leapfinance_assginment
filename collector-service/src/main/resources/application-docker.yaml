@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -11,9 +11,9 @@ mongodb:
   logs-database: logs_db
   meta-database: meta_db
   pool:
-    min-size: 5
-    max-size: 50
-    max-wait-time-ms: 10000
+    min-size: 2
+    max-size: 10
+    max-wait-time-ms: 30000
     max-connection-idle-time-ms: 60000
 
 # Security Configuration
@@ -32,4 +32,6 @@ cors:
 logging:
   level:
     com.leapfinance: ${LOG_LEVEL:INFO}
-    org.springframework.data.mongodb: WARN
+    org.springframework.data.mongodb: ${LOG_LEVEL:INFO}
+    org.springframework: INFO
+    root: INFO
