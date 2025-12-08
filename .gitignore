@@ -16,9 +16,8 @@ build/
 *.war
 *.ear
 
-# Logs
+# Log files (not directories)
 *.log
-logs/
 
 # OS
 .DS_Store
