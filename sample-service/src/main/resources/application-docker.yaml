@@ -1,0 +1,28 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: sample-service
+
+# API Monitoring Configuration for Docker
+monitoring:
+  enabled: true
+  collector:
+    url: ${COLLECTOR_URL:http://collector-service:8080}
+    api-key: ${SERVICE_API_KEY:infopulse-service-api-key-2024}
+    connection-timeout: 5000
+    read-timeout: 10000
+    retry-attempts: 3
+    retry-delay: 1000
+  service:
+    name: sample-service
+  rate-limit:
+    enabled: true
+    limit: 100
+    window-seconds: 1
+
+# Logging
+logging:
+  level:
+    com.leapfinance: INFO

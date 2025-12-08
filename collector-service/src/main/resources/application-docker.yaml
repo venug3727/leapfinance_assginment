@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: infopulse-collector
+
+# MongoDB Configuration for Docker environment
+mongodb:
+  uri: ${MONGODB_URI:mongodb://admin:admin123@mongodb:27017}
+  logs-database: logs_db
+  meta-database: meta_db
+  pool:
+    min-size: 5
+    max-size: 50
+    max-wait-time-ms: 10000
+    max-connection-idle-time-ms: 60000
+
+# Security Configuration
+security:
+  jwt:
+    secret: ${JWT_SECRET:leap-finance-super-secret-key-for-jwt-tokens-2024}
+    expiration-ms: 86400000
+    refresh-expiration-ms: 604800000
+  service-api-key: ${SERVICE_API_KEY:infopulse-service-api-key-2024}
+
+# CORS Configuration
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000}
+
+# Logging
+logging:
+  level:
+    com.leapfinance: ${LOG_LEVEL:INFO}
+    org.springframework.data.mongodb: WARN

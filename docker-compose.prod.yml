@@ -1,0 +1,64 @@
+# =============================================================================
+# INFOPULSE - PRODUCTION DOCKER COMPOSE
+# =============================================================================
+# Use this for Railway, Render, or other cloud deployments
+# MongoDB should be hosted on MongoDB Atlas for production
+# =============================================================================
+
+services:
+  # Collector Service (Spring Boot)
+  collector-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.collector
+    container_name: infopulse-collector
+    ports:
+      - "${COLLECTOR_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URI: ${MONGODB_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_API_KEY: ${SERVICE_API_KEY}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # Sample Service (Traffic Generator)
+  sample-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.sample
+    container_name: infopulse-sample
+    ports:
+      - "${SAMPLE_PORT:-8081}:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      COLLECTOR_URL: ${COLLECTOR_URL:-http://collector-service:8080}
+      SERVICE_API_KEY: ${SERVICE_API_KEY}
+    depends_on:
+      collector-service:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Next.js Dashboard
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    container_name: infopulse-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-3000}:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+      NODE_ENV: production
+    depends_on:
+      - collector-service
+    restart: unless-stopped

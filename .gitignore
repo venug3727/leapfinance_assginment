@@ -1,0 +1,49 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Kotlin
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+*.env.local
+
+# Keep example files
+!.env.example
+!.env.production.example
+
+# Node
+node_modules/
+.next/
+out/
+.npm
+
+# Docker
+docker-compose.override.yml
+
+# Compiled output
+dist/
+tmp/

@@ -1,0 +1,35 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: sample-service
+
+# API Monitoring Configuration (uses tracking-client library)
+monitoring:
+  enabled: true
+  collector:
+    url: ${COLLECTOR_URL:http://localhost:8080}
+    api-key: ${SERVICE_API_KEY:infopulse-service-api-key-2024}
+    connection-timeout: 5000
+    read-timeout: 10000
+    retry-attempts: 3
+    retry-delay: 1000
+  service:
+    name: sample-service
+  rate-limit:
+    enabled: true
+    limit: 100 # 100 requests per second
+    window-seconds: 1
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# Logging
+logging:
+  level:
+    com.leapfinance: DEBUG

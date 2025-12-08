@@ -1,0 +1,96 @@
+version: "3.8"
+
+# =============================================================================
+# INFOPULSE - API MONITORING PLATFORM
+# =============================================================================
+# This setup uses a LOCAL MongoDB container for reliable development.
+#
+# To use MongoDB Atlas instead, update the MONGODB_URI environment variable.
+# =============================================================================
+
+services:
+  # Local MongoDB (for reliable development)
+  mongodb:
+    image: mongo:7.0
+    container_name: infopulse-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - infopulse-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Collector Service
+  collector-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.collector
+    container_name: infopulse-collector
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      # Use local MongoDB (more reliable for development)
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-leap-finance-super-secret-key-for-jwt-tokens-2024}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-infopulse-service-api-key-2024}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - infopulse-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Sample Service (uses tracking client)
+  sample-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.sample
+    container_name: infopulse-sample
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      COLLECTOR_URL: http://collector-service:8080
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-infopulse-service-api-key-2024}
+    depends_on:
+      collector-service:
+        condition: service_healthy
+    networks:
+      - infopulse-network
+
+  # Next.js Dashboard
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: infopulse-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    depends_on:
+      - collector-service
+    networks:
+      - infopulse-network
+
+networks:
+  infopulse-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

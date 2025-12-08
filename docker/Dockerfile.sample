@@ -1,0 +1,32 @@
+# Sample Service Dockerfile
+FROM gradle:8.5-jdk17 AS builder
+
+WORKDIR /app
+
+# Copy gradle files
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY tracking-client/build.gradle.kts tracking-client/
+COPY sample-service/build.gradle.kts sample-service/
+
+# Copy source code
+COPY tracking-client/src tracking-client/src
+COPY sample-service/src sample-service/src
+
+# Build the application
+RUN gradle :sample-service:bootJar --no-daemon
+
+# Runtime stage
+FROM eclipse-temurin:17-jre-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/sample-service/build/libs/*.jar app.jar
+
+EXPOSE 8081
+
+# Add JVM arguments to open java modules for reflection
+ENTRYPOINT ["java", \
+    "--add-opens=java.base/java.time=ALL-UNNAMED", \
+    "--add-opens=java.base/java.lang=ALL-UNNAMED", \
+    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED", \
+    "-jar", "app.jar"]
