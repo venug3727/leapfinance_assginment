@@ -24,11 +24,9 @@ RUN apk add --no-cache curl
 
 COPY --from=builder /app/collector-service/build/libs/*.jar app.jar
 
-EXPOSE 8080
+# Railway uses PORT env variable
+ENV PORT=8080
+EXPOSE $PORT
 
-# Add JVM arguments to open java.time module for Spring Data MongoDB reflection
-ENTRYPOINT ["java", \
-    "--add-opens=java.base/java.time=ALL-UNNAMED", \
-    "--add-opens=java.base/java.lang=ALL-UNNAMED", \
-    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED", \
-    "-jar", "app.jar"]
+# Add JVM arguments and use PORT variable for Railway compatibility
+ENTRYPOINT ["sh", "-c", "java --add-opens=java.base/java.time=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED -Dserver.port=${PORT:-8080} -jar app.jar"]
