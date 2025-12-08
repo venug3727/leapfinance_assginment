@@ -605,5 +605,3 @@ Best performance for Next.js:
 ## 📄 License
 
 MIT License - © 2024 Leap Finance
-#   l e a p f i n a n c e _ a s s g i n m e n t  
- 
