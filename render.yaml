@@ -10,7 +10,6 @@ services:
     dockerContext: .
     plan: free
     healthCheckPath: /actuator/health
-    initialDeployHook: echo "Starting InfoPulse Collector..."
     envVars:
       - key: MONGODB_URI
         sync: false
@@ -19,13 +18,11 @@ services:
       - key: SERVICE_API_KEY
         sync: false
       - key: CORS_ALLOWED_ORIGINS
-        value: "*"
+        value: "https://infopulse-dashboard.onrender.com"
       - key: SPRING_PROFILES_ACTIVE
         value: docker
-      - key: PORT
-        value: "8080"
 
-  # Dashboard (Next.js Frontend)  
+  # Dashboard (Next.js Frontend)
   - type: web
     name: infopulse-dashboard
     runtime: docker
@@ -34,7 +31,4 @@ services:
     plan: free
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          name: infopulse-collector
-          type: web
-          property: hostport
+        value: "https://infopulse-collector.onrender.com"

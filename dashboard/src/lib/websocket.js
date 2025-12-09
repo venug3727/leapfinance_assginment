@@ -11,7 +11,15 @@ import {
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8080/ws";
+// Determine WebSocket URL based on API URL (handles http/https properly)
+const getWsUrl = () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  // For production (https), we need to use the same protocol
+  // SockJS will handle the actual transport (ws/wss/xhr)
+  return `${apiUrl}/ws`;
+};
+
+const WS_URL = getWsUrl();
 
 const WebSocketContext = createContext(null);
 
