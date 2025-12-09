@@ -5,11 +5,12 @@ services:
   # Collector Service (Spring Boot Backend)
   - type: web
     name: infopulse-collector
-    env: docker
+    runtime: docker
     dockerfilePath: ./docker/Dockerfile.collector
     dockerContext: .
     plan: free
     healthCheckPath: /actuator/health
+    initialDeployHook: echo "Starting InfoPulse Collector..."
     envVars:
       - key: MONGODB_URI
         sync: false
@@ -22,12 +23,12 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: docker
       - key: PORT
-        value: 8080
+        value: "8080"
 
-  # Dashboard (Next.js Frontend)
+  # Dashboard (Next.js Frontend)  
   - type: web
     name: infopulse-dashboard
-    env: docker
+    runtime: docker
     dockerfilePath: ./dashboard/Dockerfile
     dockerContext: ./dashboard
     plan: free
@@ -36,4 +37,4 @@ services:
         fromService:
           name: infopulse-collector
           type: web
-          property: host
+          property: hostport
