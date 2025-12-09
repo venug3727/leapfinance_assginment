@@ -1,0 +1,39 @@
+# Render Blueprint - Infrastructure as Code
+# https://render.com/docs/blueprint-spec
+
+services:
+  # Collector Service (Spring Boot Backend)
+  - type: web
+    name: infopulse-collector
+    env: docker
+    dockerfilePath: ./docker/Dockerfile.collector
+    dockerContext: .
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: SERVICE_API_KEY
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
+      - key: SPRING_PROFILES_ACTIVE
+        value: docker
+      - key: PORT
+        value: 8080
+
+  # Dashboard (Next.js Frontend)
+  - type: web
+    name: infopulse-dashboard
+    env: docker
+    dockerfilePath: ./dashboard/Dockerfile
+    dockerContext: ./dashboard
+    plan: free
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: infopulse-collector
+          type: web
+          property: host
